@@ -1,6 +1,7 @@
 // EXPRESS
 var express = require('express');
 var app = express();
+app.use(express.static(__dirname));
 
 // parse application/x-www-form-urlencoded
 var bodyParser = require('body-parser');
@@ -16,6 +17,7 @@ app.set('view engine', 'handlebars');
 
 // MONGODB
 var mongoose = require('mongoose');
+// mongodb://<username>:<password>@ds117200.mlab.com:17200/todos
 const url = 'mongodb://user01:palpebralfissures@ds117200.mlab.com:17200/todos';
 mongoose.connect(url, (err) => {
     if(err) console.log(err);
@@ -29,6 +31,7 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // a schema represents a collection and defines the shape of a document in that collection
 var Schema = mongoose.Schema;
 var todoSchema = new Schema({
+    _id: String,
     description: String,
     deadline: { type: Date, default: Date.now },
     progress: Number
@@ -39,6 +42,7 @@ var todoModel = mongoose.model('ToDo', todoSchema);
 // root page
 app.get('/', function(req, res) {
     res.render('home', {title: 'Create TODO'});
+    //res.sendFile(__dirname + "/create-todo.html");
 });
 
 /*
@@ -46,13 +50,33 @@ create new to-do if it doesnt exists
 */
 app.post('/add-todo', (req, res) => {
 
-    console.log(req.body);
+    //console.log(req.body._id = req.body.description);
     var todo = new todoModel(req.body);
-    console.log("todo.description: " + todo.description);
-    console.log("todo.deadline: " + todo.deadline);
-    console.log("todo.progress: " + todo.progress);
+    todo._id = todo.description;
+    //console.log(JSON.stringify(todo));
 
-    // iterate over all documents and print them
+    // insert document only if to-do doesnt exist
+    todo.save((err, todo) => {
+        if (err) {
+            if(err.code === 11000) {
+                console.log("TODO already exists");
+            } else console.log(err);
+        } else {
+            console.log("saved : " + JSON.stringify(todo));
+        }
+    });
+
+    // update if document is in DB else save new document
+    /*
+    todoModel.findOneAndUpdate(req.body, req.body, {upsert: true}, function (err, doc) {
+        if (err) {
+            console.error(err.stack);
+        } else {
+            console.log("saved in DB");
+        }
+    });*/
+
+    // FOR TESTING: iterate over all documents and print them
     todoModel.find({}, (err, todo) => {
         if(err) console.log(err);
         console.log("Show all documents in DB:");
@@ -61,31 +85,25 @@ app.post('/add-todo', (req, res) => {
         });
     });
 
-    // update if document is in DB else save new document
-    todoModel.findOneAndUpdate(req.body, req.body, {upsert: true}, function (err, doc) {
-        if (err) {
-            console.error(err.stack);
-        } else {
-            console.log("saved in DB");
-        }
-    });
-
     res.redirect('/');
 })
 
 /*
 *
 * */
-app.get("/list-of-all-todos", (req, res) => {
+app.get("/list-of-all-todos", (req, res, next) => {
     //res.status(200);
-    res.render(list, {title: 'List TODOs'});
+    res.render('list', {title: 'List TODOs'});
+    //res.sendFile(__dirname + "/list-of-all-todos.html");
+    //res.sendFile("list-of-all-todos.html");
 });
 /*
 *
 * */
 app.get("/imprint", (req, res) => {
     //res.status(200);
-    res.render(imprint, {title: 'Imprint'});
+    res.render('imprint', {title: 'Imprint'});
+    //res.sendFile(__dirname + "/imprint.html");
 });
 
 // 404 catch-all handler (middleware)
