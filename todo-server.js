@@ -42,13 +42,12 @@ var todoModel = mongoose.model('ToDo', todoSchema);
 // root page
 app.get('/', function(req, res) {
     res.render('home', {title: 'Create TODO'});
-    //res.sendFile(__dirname + "/create-todo.html");
 });
 
 /*
 create new to-do if it doesnt exists
 */
-app.post('/add-todo', (req, res) => {
+app.post('/addTODO', (req, res) => {
 
     //console.log(req.body._id = req.body.description);
     var todo = new todoModel(req.body);
@@ -77,25 +76,42 @@ app.post('/add-todo', (req, res) => {
     });*/
 
     // FOR TESTING: iterate over all documents and print them
-    todoModel.find({}, (err, todo) => {
+    /*todoModel.find({}, (err, todo) => {
         if(err) console.log(err);
         console.log("Show all documents in DB:");
-        todo.map(todo => {
+        todo.map((todo) => {
             console.log(JSON.stringify(todo));
         });
-    });
+    });*/
 
     res.redirect('/');
 })
 
+/**/
+app.post("/editTODO", (req, res, next) => {
+    console.log(req.body);
+    res.redirect('/listTODO');
+});
+
+/**/
+app.post("/deleteTODO", (req, res, next) => {
+    console.log(req.body);
+    res.redirect('/listTODO');
+});
+
 /*
 *
 * */
-app.get("/list-of-all-todos", (req, res, next) => {
-    //res.status(200);
-    res.render('list', {title: 'List TODOs'});
-    //res.sendFile(__dirname + "/list-of-all-todos.html");
-    //res.sendFile("list-of-all-todos.html");
+app.get("/listTODO", (req, res, next) => {
+
+    todoModel.find({}, (err, todo) => {
+        if(err) console.log(err);
+
+        var todos = todo.map((todo) => {
+            return todo;
+        });
+        res.render('list', {title: 'List TODOs', todos: todos});
+    });
 });
 /*
 *
@@ -103,7 +119,6 @@ app.get("/list-of-all-todos", (req, res, next) => {
 app.get("/imprint", (req, res) => {
     //res.status(200);
     res.render('imprint', {title: 'Imprint'});
-    //res.sendFile(__dirname + "/imprint.html");
 });
 
 // 404 catch-all handler (middleware)
