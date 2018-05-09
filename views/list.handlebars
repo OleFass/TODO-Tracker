@@ -1,40 +1,36 @@
-<table class="table table-hover table-sm">
+<table id="table" class="table table-hover table-sm">
   <thead>
-    <tr>
-      <th>Description</th>
-      <th>Date</th>
-      <th>Progress</th>
-      <th></th>
-    </tr>
+  <tr>
+    <th scope="col">#</th>
+    <th scope="col">Description</th>
+    <th scope="col">Date</th>
+    <th scope="col">Progress</th>
+  </tr>
   </thead>
   <tbody>
+  {{#each todos}}
     <tr>
-      <td>set up mongoDB</td>
-      <td>23.04.2018</td>
-      <td>23%</td>
+      <th scope="row">{{@index}}</th>
+      <td>{{description}}</td>
+      <td>{{deadline}}</td>
+      <td>{{progress}}</td>
       <td>
-        <a href="/edit-todo" class="btn btn-primary">Edit</a>
-        <a href="#" class="btn btn-danger">Delete</a>
+        <form action="/editTODO" method="POST">
+          <button type="submit" name="edit" value="edit" class="btn btn-primary">Edit</button>
+        </form>
+        <form action="/deleteTODO" method="POST">
+          <button type="submit" name="delete" value="delete" class="btn btn-primary">Delete</button>
+        </form>
       </td>
     </tr>
-    <tr>
-      <td>add new ToDo</td>
-      <td>23.04.2018</td>
-      <td>0%</td>
-      <td>
-        <a href="/edit-todo" class="btn btn-primary">Edit</a>
-        <a href="#" class="btn btn-danger">Delete</a>
-      </td>
-    </tr>
-    <tr>
-      <td>mark ToDo as done</td>
-      <td>23.04.2018</td>
-      <td>95%</td>
-      <td>
-        <a href="/edit-todo" class="btn btn-primary">Edit</a>
-        <a href="#" class="btn btn-danger">Delete</a>
-      </td>
-    </tr>
+  {{/each}}
   </tbody>
+
+  <script>
+    var edit_todo(id) => {
+      var btn = document.getElementById("");
+    };
+  </script>
+
 </table>
-<a class="btn btn-primary" href="/create-todo">Create TODO</a>
+<a class="btn btn-primary" href="/">Create TODO</a>
