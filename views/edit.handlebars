@@ -1,8 +1,8 @@
-<h2>Create TODO</h2>
-<form action="/addTODO" method="POST">
+<h2>Edit TODO</h2>
+<form action="/updateTODO" method="POST">
   <div class="form-group">
     <label for="desc">Description:</label>
-    <input id="desc" type="text" class="form-control" name="description" placeholder="TODO" value="{{description}}" maxlength=160>
+    <input id="desc" type="text" class="form-control" name="description" placeholder="TODO" value="{{description}}" maxlength=160 readonly>
   </div>
   <div class="form-group">
     <label for="ddln">Deadline:</label>

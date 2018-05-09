@@ -8,6 +8,7 @@
   </tr>
   </thead>
   <tbody>
+  <!-- iterate todos -->
   {{#each todos}}
     <tr>
       <th scope="row">{{@index}}</th>
@@ -16,10 +17,10 @@
       <td>{{progress}}</td>
       <td>
         <form action="/editTODO" method="POST">
-          <button type="submit" name="edit" value="edit" class="btn btn-primary">Edit</button>
+          <button type="submit" name="id" value="{{description}}" class="btn btn-primary">Edit</button>
         </form>
         <form action="/deleteTODO" method="POST">
-          <button type="submit" name="delete" value="delete" class="btn btn-primary">Delete</button>
+          <button type="submit" name="id" value="{{description}}" class="btn btn-primary">Delete</button>
         </form>
       </td>
     </tr>

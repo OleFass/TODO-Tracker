@@ -17,7 +17,7 @@ app.set('view engine', 'handlebars');
 
 // MONGODB
 var mongoose = require('mongoose');
-// mongodb://<username>:<password>@ds117200.mlab.com:17200/todos
+// format: 'mongodb://<username>:<password>@ds117200.mlab.com:17200/todos'
 const url = 'mongodb://user01:palpebralfissures@ds117200.mlab.com:17200/todos';
 mongoose.connect(url, (err) => {
     if(err) console.log(err);
@@ -39,20 +39,20 @@ var todoSchema = new Schema({
 // convert schema to model. instances of models are documents
 var todoModel = mongoose.model('ToDo', todoSchema);
 
-// root page
+/*
+* root page to create TO-DO
+* */
 app.get('/', function(req, res) {
-    res.render('home', {title: 'Create TODO'});
+    res.render('home', {title: 'Create TODO', description: "brush teeth", deadline: "2018-05-17T00:00:00.000Z", progress: 23});
 });
 
 /*
-create new to-do if it doesnt exists
-*/
+* create new to-do if it doesnt exists
+* */
 app.post('/addTODO', (req, res) => {
 
-    //console.log(req.body._id = req.body.description);
     var todo = new todoModel(req.body);
     todo._id = todo.description;
-    //console.log(JSON.stringify(todo));
 
     // insert document only if to-do doesnt exist
     todo.save((err, todo) => {
@@ -64,38 +64,41 @@ app.post('/addTODO', (req, res) => {
             console.log("saved : " + JSON.stringify(todo));
         }
     });
-
-    // update if document is in DB else save new document
-    /*
-    todoModel.findOneAndUpdate(req.body, req.body, {upsert: true}, function (err, doc) {
-        if (err) {
-            console.error(err.stack);
-        } else {
-            console.log("saved in DB");
-        }
-    });*/
-
-    // FOR TESTING: iterate over all documents and print them
-    /*todoModel.find({}, (err, todo) => {
-        if(err) console.log(err);
-        console.log("Show all documents in DB:");
-        todo.map((todo) => {
-            console.log(JSON.stringify(todo));
-        });
-    });*/
-
-    res.redirect('/');
+    res.redirect('/listTODO');
 })
 
-/**/
+/*
+* target of submit
+* */
 app.post("/editTODO", (req, res, next) => {
-    console.log(req.body);
+
+    //console.log(req.body.id);
+    todoModel.findById(req.body.id, (err, todo) => {
+        if(err) console.log(err);
+        res.render('edit', {title: 'Edit TODO', description: todo.description, deadline: todo.deadline, progress: todo.progress});
+    });
+});
+
+/*
+*
+* */
+app.post("/updateTODO", (req, res, next) => {
+    todoModel.findByIdAndUpdate(req.body.description, req.body, (err, todo) => {
+        if(err) console.log(err);
+    });
     res.redirect('/listTODO');
 });
 
-/**/
+/*
+*
+* */
 app.post("/deleteTODO", (req, res, next) => {
-    console.log(req.body);
+    todoModel.findByIdAndRemove(req.body.id, (err) => {
+        if (err)
+            console.log(err);
+        else
+            console.log("doc removed");
+    });
     res.redirect('/listTODO');
 });
 
@@ -110,9 +113,11 @@ app.get("/listTODO", (req, res, next) => {
         var todos = todo.map((todo) => {
             return todo;
         });
+        // send todos array to dynamically render table of todos in list.handlebars
         res.render('list', {title: 'List TODOs', todos: todos});
     });
 });
+
 /*
 *
 * */
@@ -121,13 +126,13 @@ app.get("/imprint", (req, res) => {
     res.render('imprint', {title: 'Imprint'});
 });
 
-// 404 catch-all handler (middleware)
+// 404 catch-all handler
 app.use((req, res, next) => {
     res.status(404);
     res.render('404', {title: '404'});
 })
 
-// 500 error handler (middleware)
+// 500 error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500);
