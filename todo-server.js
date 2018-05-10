@@ -11,7 +11,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.set('port', process.env.PORT || 3000);
 
 // HANDELBARS
-var handlebars = require('express-handlebars').create({ defaultLayout:'main' });
+var handlebars = require('express-handlebars').create({
+    defaultLayout:'main',
+    // register handlebars helper function to format dates in list
+    helpers: {
+        formatDate: function(date) {
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            let day = date.getDate();
+            if(month < 10) {
+                month = "0" + month;
+            }
+            return year + "-" + month + "-" + day;
+        }
+    }
+});
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
 
@@ -43,7 +57,7 @@ var todoModel = mongoose.model('ToDo', todoSchema);
 * root page to create TO-DO
 * */
 app.get('/', function(req, res) {
-    res.render('home', {title: 'Create TODO', description: "brush teeth", deadline: "2018-05-17T00:00:00.000Z", progress: 23});
+    res.render('home', {title: 'Create TODO'});
 });
 
 /*
@@ -72,10 +86,19 @@ app.post('/addTODO', (req, res) => {
 * */
 app.post("/editTODO", (req, res, next) => {
 
-    //console.log(req.body.id);
     todoModel.findById(req.body.id, (err, todo) => {
         if(err) console.log(err);
-        res.render('edit', {title: 'Edit TODO', description: todo.description, deadline: todo.deadline, progress: todo.progress});
+
+        // format date
+        let year = todo.deadline.getFullYear();
+        let month = todo.deadline.getMonth() + 1;
+        let day = todo.deadline.getDate();
+        if(month < 10) {
+            month = "0" + month;
+        }
+        var deadline = year + "-" + month + "-" + day;
+
+        res.render('edit', {title: 'Edit TODO', description: todo.description, deadline: deadline, progress: todo.progress});
     });
 });
 
