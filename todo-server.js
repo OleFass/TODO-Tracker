@@ -22,6 +22,9 @@ var handlebars = require('express-handlebars').create({
             if(month < 10) {
                 month = "0" + month;
             }
+            if(day < 10) {
+            day = "0" + day;
+            }
             return year + "-" + month + "-" + day;
         }
     }
@@ -45,7 +48,6 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // a schema represents a collection and defines the shape of a document in that collection
 var Schema = mongoose.Schema;
 var todoSchema = new Schema({
-    _id: String,
     description: String,
     deadline: { type: Date, default: Date.now },
     progress: Number
@@ -54,10 +56,10 @@ var todoSchema = new Schema({
 var todoModel = mongoose.model('ToDo', todoSchema);
 
 /*
-* root page to create TO-DO
+* page to create TO-DO
 * */
-app.get('/', function(req, res) {
-    res.render('home', {title: 'Create TODO'});
+app.get('/addTODO', function(req, res) {
+    res.render('create');
 });
 
 /*
@@ -66,7 +68,6 @@ app.get('/', function(req, res) {
 app.post('/addTODO', (req, res) => {
 
     var todo = new todoModel(req.body);
-    todo._id = todo.description;
 
     // insert document only if to-do doesnt exist
     todo.save((err, todo) => {
@@ -78,57 +79,48 @@ app.post('/addTODO', (req, res) => {
             console.log("saved : " + JSON.stringify(todo));
         }
     });
-    res.redirect('/listTODO');
+    res.redirect('/');
 })
 
 /*
 * target of submit
 * */
-app.post("/editTODO", (req, res, next) => {
+app.post("/editTODO", (req, res) => {
 
     todoModel.findById(req.body.id, (err, todo) => {
         if(err) console.log(err);
 
-        // format date
-        let year = todo.deadline.getFullYear();
-        let month = todo.deadline.getMonth() + 1;
-        let day = todo.deadline.getDate();
-        if(month < 10) {
-            month = "0" + month;
-        }
-        var deadline = year + "-" + month + "-" + day;
-
-        res.render('edit', {title: 'Edit TODO', description: todo.description, deadline: deadline, progress: todo.progress});
+        res.render('edit', {_id: todo.id, description: todo.description, deadline: todo.deadline, progress: todo.progress});
     });
 });
 
 /*
 *
 * */
-app.post("/updateTODO", (req, res, next) => {
-    todoModel.findByIdAndUpdate(req.body.description, req.body, (err, todo) => {
+app.post("/updateTODO", (req, res) => {
+    todoModel.findByIdAndUpdate(req.body.id, req.body, (err, todo) => {
         if(err) console.log(err);
     });
-    res.redirect('/listTODO');
+    res.redirect('/');
 });
 
 /*
 *
 * */
-app.post("/deleteTODO", (req, res, next) => {
+app.post("/deleteTODO", (req, res) => {
     todoModel.findByIdAndRemove(req.body.id, (err) => {
         if (err)
             console.log(err);
         else
             console.log("doc removed");
     });
-    res.redirect('/listTODO');
+    res.redirect('/');
 });
 
 /*
-*
+* list all todos
 * */
-app.get("/listTODO", (req, res, next) => {
+app.get("/", (req, res) => {
 
     todoModel.find({}, (err, todo) => {
         if(err) console.log(err);
@@ -136,8 +128,8 @@ app.get("/listTODO", (req, res, next) => {
         var todos = todo.map((todo) => {
             return todo;
         });
-        // send todos array to dynamically render table of todos in list.handlebars
-        res.render('list', {title: 'List TODOs', todos: todos});
+        // send todos array to dynamically render table of todos in home.handlebars
+        res.render('home', {title: 'List TODOs', todos: todos});
     });
 });
 

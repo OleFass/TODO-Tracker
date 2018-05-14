@@ -1,5 +1,5 @@
-<h2>Edit TODO</h2>
-<form action="/updateTODO" method="POST">
+<h2>Create TODO</h2>
+<form action="/addTODO" method="POST">
   <div class="form-group">
     <label for="desc">Description:</label>
     <input
@@ -8,8 +8,8 @@
         class="form-control"
         name="description"
         placeholder="TODO"
-        value="{{description}}"
         maxlength=160
+        required
     >
   </div>
   <div class="form-group">
@@ -19,8 +19,7 @@
         type="date"
         class="form-control"
         name="deadline"
-        placeholder="Deadline"
-        value="{{formatDate deadline}}"
+        placeholder="YYYY-MM-DD"
         required
     >
     <span class="validity"></span>
@@ -33,9 +32,9 @@
         class="form-control"
         name="progress"
         placeholder="Progress"
-        value="{{progress}}"
+        value="0"
         max=100 min=0
     >
   </div>
-  <button type="submit" name="id" value="{{_id}}" class="btn btn-primary">Save changes</button>
+  <input class="btn btn-primary" type="submit" value="Save">
 </form>
